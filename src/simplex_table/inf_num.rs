@@ -8,20 +8,6 @@ pub struct InfNum<T> {
     num: T,
 }
 
-impl<T> InfNum<T> {
-    pub fn new(inf: T, num: T) -> Self {
-        Self { inf, num }
-    }
-
-    pub fn inf(&self) -> &T {
-        &self.inf
-    }
-
-    pub fn num(&self) -> &T {
-        &self.num
-    }
-}
-
 impl<T: Default> From<T> for InfNum<T> {
     fn from(value: T) -> Self {
         Self { inf: T::default(), num: value }
@@ -45,10 +31,6 @@ impl<T: Zero> Zero for InfNum<T> {
 }
 
 impl<T: One + Zero> InfNum<T> {
-    pub fn one() -> Self {
-        Self { inf: T::zero(), num: T::one() }
-    }
-
     pub fn one_inf() -> Self {
         Self { inf: T::one(), num: T::zero() }
     }

@@ -3,10 +3,9 @@ use std::io;
 use problem::Problem;
 use simplex_table::SimplexTable;
 
+mod util;
 mod problem;
 mod simplex_table;
-mod equation;
-mod inf_num;
 
 fn main() -> anyhow::Result<()> {
     let problem = Problem::read_from_input(io::stdin().lock())?;
