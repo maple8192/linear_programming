@@ -1,11 +1,13 @@
 use fraction::{Fraction, Zero};
 
-use crate::problem::{Problem, Relation};
+use crate::{problem::{Problem, Relation}, util::objective::Objective};
 
 use super::{equation::Equation, inf_num::InfNum, SimplexTable};
 
 impl From<Problem> for SimplexTable {
     fn from(value: Problem) -> Self {
+        let objective = value.objective();
+
         let mut constraints = Vec::new();
         for constraint in value.constraints().iter() {
             let mut lhs = Vec::new();
@@ -51,15 +53,14 @@ impl From<Problem> for SimplexTable {
             for (j, (lhs, _, _)) in constraints.iter_mut().enumerate() {
                 lhs.push(if i == j { 1 } else { 0 }.into());
             }
-            function.0.push(-InfNum::<Fraction>::one_inf());
+            function.0.push(InfNum::<Fraction>::one_inf() * if objective == Objective::Minimize { -1 } else { 1 });
             base.push(function.0.len());
             for (func, &cnst) in function.0.iter_mut().zip(&constraints[i].0) {
-                *func += InfNum::<Fraction>::one_inf() * cnst;
+                *func += InfNum::<Fraction>::one_inf() * (cnst * if objective == Objective::Maximize { -1 } else { 1 });
             }
-            function.1 += InfNum::<Fraction>::one_inf() * constraints[i].1;
+            function.1 += InfNum::<Fraction>::one_inf() * constraints[i].1 * if objective == Objective::Maximize { -1 } else { 1 };
         }
 
-        let objective = value.objective();
         let constraints = constraints.into_iter().zip(base).map(|((lhs, rhs, _), base)| (base, Equation::new(lhs, rhs))).collect();
         let function = Equation::new(function.0, function.1);
         Self { objective, constraints, function }

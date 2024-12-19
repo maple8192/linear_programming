@@ -28,7 +28,7 @@ impl SimplexTable {
         }.unwrap();
         let pivot_i = self.function.lhs().iter().enumerate().find(|&(_, x)| x == coef_min_or_max).unwrap().0;
         let theta = self.constraints.iter().map(|(_, c)| c.rhs() / c.lhs()[pivot_i]);
-        let theta_min = theta.clone().filter(|&x| x >= Fraction::zero()).min().unwrap();
+        let theta_min = theta.clone().filter(|&x| x > Fraction::zero()).min().unwrap();
         let pivot_j = theta.enumerate().find(|&(_, f)| f == theta_min).unwrap().0;
         let pivot = self.constraints[pivot_j].1.lhs()[pivot_i];
         self.constraints[pivot_j].0 = pivot_i + 1;
