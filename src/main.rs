@@ -16,13 +16,11 @@ fn main() -> anyhow::Result<()> {
     let mut simplex = SimplexTable::from(problem);
     println!("{simplex}");
 
-    let mut i = 0;
     while {
         let end = simplex.step();
         println!();
         println!("{simplex}");
-        i += 1;
-        !end && i < 100
+        !end
     } {}
 
     Ok(())
