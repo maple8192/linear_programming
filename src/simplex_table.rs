@@ -23,9 +23,9 @@ impl SimplexTable {
         if self.objective == Objective::Minimize && self.function.lhs().iter().all(|&x| x <= InfNum::zero()) { return true; }
 
         let coef_min_or_max = match self.objective {
-            Objective::Maximize => self.function.lhs().iter().min(),
-            Objective::Minimize => self.function.lhs().iter().max(),
-        }.unwrap();
+            Objective::Maximize => self.function.lhs().iter().enumerate().filter(|&(i, _)| self.constraints.iter().any(|(_, a)| a.lhs()[i] > Fraction::zero())).min_by_key(|x| x.1),
+            Objective::Minimize => self.function.lhs().iter().enumerate().filter(|&(i, _)| self.constraints.iter().any(|(_, a)| a.lhs()[i] > Fraction::zero())).max_by_key(|x| x.1),
+        }.unwrap().1;
         let pivot_i = self.function.lhs().iter().enumerate().find(|&(_, x)| x == coef_min_or_max).unwrap().0;
         let a_theta = self.constraints.iter().map(|(_, c)| (c.lhs()[pivot_i], c.rhs() / c.lhs()[pivot_i]));
         let theta_min = a_theta.clone().filter(|&(x, _)| x > Fraction::zero()).min_by_key(|&(_, y)| y).unwrap().1;
