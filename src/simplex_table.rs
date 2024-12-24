@@ -27,9 +27,9 @@ impl SimplexTable {
             Objective::Minimize => self.function.lhs().iter().max(),
         }.unwrap();
         let pivot_i = self.function.lhs().iter().enumerate().find(|&(_, x)| x == coef_min_or_max).unwrap().0;
-        let theta = self.constraints.iter().map(|(_, c)| c.rhs() / c.lhs()[pivot_i]);
-        let theta_min = theta.clone().filter(|&x| x > Fraction::zero()).min().unwrap();
-        let pivot_j = theta.enumerate().find(|&(_, f)| f == theta_min).unwrap().0;
+        let a_theta = self.constraints.iter().map(|(_, c)| (c.lhs()[pivot_i], c.rhs() / c.lhs()[pivot_i]));
+        let theta_min = a_theta.clone().filter(|&(x, _)| x > Fraction::zero()).min_by_key(|&(_, y)| y).unwrap().1;
+        let pivot_j = a_theta.enumerate().find(|&(_, (a, f))| a > Fraction::zero() && f == theta_min).unwrap().0;
         let pivot = self.constraints[pivot_j].1.lhs()[pivot_i];
         self.constraints[pivot_j].0 = pivot_i + 1;
 
@@ -51,7 +51,7 @@ impl SimplexTable {
 
 impl Display for SimplexTable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "||{}|RHS|", (0..self.function.lhs().len()).map(|i| format!("$x_{}$", i + 1)).collect::<Vec<_>>().join("|"))?;
+        writeln!(f, "||{}|RHS|", (0..self.function.lhs().len()).map(|i| format!("$x_{{{}}}$", i + 1)).collect::<Vec<_>>().join("|"))?;
         writeln!(f, "|{}|", (0..self.function.lhs().len() + 2).map(|_| ":-:").collect::<Vec<_>>().join("|"))?;
         for constraint in &self.constraints {
             writeln!(f, "|$x_{{{}}}$|{}|${}$|", constraint.0, constraint.1.lhs().iter().map(|x| format!("${x}$")).collect::<Vec<_>>().join("|"), constraint.1.rhs())?;
